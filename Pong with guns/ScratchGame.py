@@ -1,6 +1,7 @@
 # Import the pygame library and initialise the game engine
 import pygame
-from Paddle import Paddle
+from OldPaddle import Paddle
+from Bullet import Bullet
 
 pygame.init()
 
@@ -13,20 +14,21 @@ size = (700, 500)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Pong")
 
-paddleA = Paddle(WHITE, 10, 100)
-paddleA.rect.x = 20
-paddleA.rect.y = 200
+player_paddle = Paddle(WHITE, 10, 100)
+player_paddle.rect.x = 20
+player_paddle.rect.y = 200
 
-paddleB = Paddle(WHITE, 10, 100)
-paddleB.rect.x = 670
-paddleB.rect.y = 200
+cpu_paddle = Paddle(WHITE, 10, 100)
+cpu_paddle.rect.x = 670
+cpu_paddle.rect.y = 200
 
-# This will be a list that will contain all the sprites we intend to use in our game.
-all_sprites_list = pygame.sprite.Group()
+# This will be groups that will contain all the sprites we intend to use in our game.
+paddle_group = pygame.sprite.Group()
+bullet_group = pygame.sprite.Group()
 
 # Add the paddles to the list of sprites
-all_sprites_list.add(paddleA)
-all_sprites_list.add(paddleB)
+paddle_group.add(player_paddle)
+paddle_group.add(cpu_paddle)
 
 # The loop will carry on until the user exits the game (e.g. clicks the close button).
 carryOn = True
@@ -47,16 +49,21 @@ while carryOn:
     # Moving the paddles when the user uses the arrow keys (player A) or "W/S" keys (player B)
     keys = pygame.key.get_pressed()
     # if keys[pygame.K_w]:
-    #     paddleA.moveUp(5)
+    #     cpu_paddle.moveUp(5)
     # if keys[pygame.K_s]:
-    #     paddleA.moveDown(5)
+    #     cpu_paddle.moveDown(5)
     if keys[pygame.K_UP]:
-        paddleA.moveUp(5)
+        player_paddle.moveUp(5)
     if keys[pygame.K_DOWN]:
-        paddleA.moveDown(5)
+        player_paddle.moveDown(5)
+    if keys[pygame.K_SPACE]:
+        bullet = player_paddle.shoot()
+        if bullet:
+            bullet_group.add(bullet)
 
     # --- Game logic should go here
-    all_sprites_list.update()
+    paddle_group.update()
+    bullet_group.update()
 
     # --- Drawing code should go here
     # First, clear the screen to black.
@@ -64,13 +71,14 @@ while carryOn:
     # Draw the net
     pygame.draw.line(screen, WHITE, [349, 0], [349, 500], 5)
 
-    # Now let's draw all the sprites in one go. (For now we only have 2 sprites!)
-    all_sprites_list.draw(screen)
+    # Draw all the sprites in one go.
+    paddle_group.draw(screen)
+    bullet_group.draw(screen)
 
-    # --- Go ahead and update the screen with what we've drawn.
+    # Update the screen with what we've drawn.
     pygame.display.flip()
 
-    # --- Limit to 60 frames per second
+    # Limit to 60 frames per second
     clock.tick(60)
 
 # Once we have exited the main program loop we can stop the game engine:
