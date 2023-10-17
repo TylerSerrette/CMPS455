@@ -1,5 +1,6 @@
 import pygame
 from pygame import Vector2
+from pygame.transform import rotozoom
 
 # Ship class
 
@@ -11,15 +12,24 @@ class Ship:
         self.image = pygame.image.load("./Images/ship.png")
         # It will always go up when pressing up, even when facing somewhere else bc y = -1
         self.forward = Vector2(0, -1)
-        self.angle = 0
 
     def update(self):
         is_key_pressed = pygame.key.get_pressed()
         if is_key_pressed[pygame.K_UP]:
             self.position += self.forward
+        if is_key_pressed[pygame.K_LEFT]:
+            self.forward = self.forward.rotate(-1)
+        if is_key_pressed[pygame.K_RIGHT]:
+            self.forward = self.forward.rotate(1)
 
     def draw(self, screen):
-        screen.blit(self.image, self.position)
+        # This is done this way to the sprite can rotate from its center point and not turn weird.
+        angle = self.forward.angle_to(Vector2(0, -1))
+        # angle is rotational value and 1.0 is zoom value or scale.
+        rotated_surface = rotozoom(self.image, angle, 1.0)
+        rotated_surface_size = Vector2(rotated_surface.get_size())
+        blit_position = self.position - rotated_surface_size // 2
+        screen.blit(rotated_surface, blit_position)
 
 # Asteroid class
 
@@ -53,7 +63,7 @@ clock = pygame.time.Clock()
 
 while not game_over:
 
-    clock.tick(55)
+    clock.tick(100)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
