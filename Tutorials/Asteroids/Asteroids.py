@@ -29,8 +29,6 @@ def wrap_position(position, screen):
 
 
 # Ship class
-
-
 class Ship:
     def __init__(self, position):
         # Position variable is a 2d vector position
@@ -102,8 +100,37 @@ class Asteroid:
         self.explode = Sound("./Sounds/explode.mp3")
         self.size = size
 
+    def check_collision_with_asteroids(self, asteroids):
+        for other in asteroids:
+            if other != self:
+                if self.position.distance_to(other.position) <= self.radius + other.radius:
+                    # Calculate overlap distance
+                    overlap = (self.radius + other.radius) - \
+                        self.position.distance_to(other.position)
+
+                    # Calculate the collision normal
+                    normal = (other.position - self.position).normalize()
+
+                    # Move the asteroids apart to avoid sticking
+                    separation = overlap / 2
+                    self.position -= separation * normal
+                    other.position += separation * normal
+
+                    # Calculate relative velocity
+                    relative_velocity = other.velocity - self.velocity
+
+                    # Calculate impulse
+                    impulse = 2.0 * \
+                        relative_velocity.dot(
+                            normal) / (1 / self.radius + 1 / other.radius)
+
+                    # Update velocities
+                    self.velocity += impulse / self.radius * normal
+                    other.velocity -= impulse / other.radius * normal
+
     def update(self):
         self.position += self.velocity
+        self.check_collision_with_asteroids(asteroids)
 
     def draw(self, screen):
         self.position = wrap_position(self.position, screen)
@@ -143,9 +170,6 @@ for i in range(3):
     asteroid_position += asteroid_direction_away_from_screen_center
     asteroids.append(
         Asteroid((asteroid_position[0], asteroid_position[1]), 0))
-    # Asteroids appear in random positions on the screen.
-    # asteroids.append(Asteroid((random.randint
-    #                            (0, screen.get_width()), random.randint(0, screen.get_height()))))
 
 # Out of bounds setting container
 out_of_bounds = [-150, -150, 950, 950]
@@ -163,7 +187,6 @@ text_winner_position = ((screen.get_width() - text_winner.get_width()) //
 # Score display
 score = 0
 score_font = pygame.font.Font("./Fonts/AlienScore.ttf", 35)
-# score_text = score_font.render(f'{score}', True, (255, 255, 255))
 score_text_position = (10, 10)
 
 # Lives display
@@ -180,15 +203,6 @@ quit_text = quit_font.render(
 quit_text_rect = quit_text.get_rect()
 quit_text_rect.center = ((screen.get_width(
 ) - quit_text.get_width()) // 2, (screen.get_height() - text_loser.get_height()) // 2 + 100,)
-
-# Try again button
-try_again_font = pygame.font.Font("./Fonts/AlienFont.ttf", 50)
-try_again_hovered = False
-try_again_text = try_again_font.render(
-    'Try again?', True, ((255, 255, 255) if quit_hovered == False else (0, 0, 0)))
-try_again_rect = try_again_text.get_rect()
-try_again_rect.center = ((screen.get_width(
-) - try_again_text.get_width()) // 2, (screen.get_height() - quit_text.get_height()) // 2 + 150,)
 
 
 clock = pygame.time.Clock()
@@ -210,21 +224,12 @@ while quitting == False:
                 quit_hovered = True
             else:
                 quit_hovered = False
-            # Try again
-            if try_again_rect.collidepoint(x, y):
-                try_again_hovered = True
-            else:
-                try_again_hovered = False
 
         if event.type == MOUSEBUTTONDOWN and event.button == 1:
             if quit_hovered:
                 game_over = True
                 running = False
                 quitting = True
-            if try_again_hovered:
-                game_over = False
-                running = True
-                quitting = False
 
     if running:
         while game_over == False:
@@ -241,21 +246,12 @@ while quitting == False:
                         quit_hovered = True
                     else:
                         quit_hovered = False
-                    # Try again
-                    if try_again_rect.collidepoint(x, y):
-                        try_again_hovered = True
-                    else:
-                        try_again_hovered = False
 
                 if event.type == MOUSEBUTTONDOWN and event.button == 1:
                     if quit_hovered:
                         game_over = True
                         running = False
                         quitting = True
-                    if try_again_hovered:
-                        game_over = False
-                        running = True
-                        quitting = False
 
             clock.tick(55)
 
@@ -332,7 +328,7 @@ while quitting == False:
                         deadbullets.append(bullet)
 
                 for asteroid in asteroids:
-                    # if a hits b then a and be need to be destroyed.
+                    # if a hits b then a and b need to be destroyed.
                     if asteroid.hit(bullet.position):
                         score += 1
                         if not deadbullets.__contains__(bullet):
