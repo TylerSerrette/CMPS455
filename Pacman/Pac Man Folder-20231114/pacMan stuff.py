@@ -30,7 +30,7 @@ screen_height = 800
 screen = pygame.display.set_mode([screen_width, screen_height])
 
 # Snag the pacman sprite sheet.
-mySprites = pygame.image.load("Arcade - Pac-Man - General Sprites.png")
+mySprites = pygame.image.load("Arcade-Pac-Man-GeneralSprites.png")
 # Show the size of the sheet
 size = mySprites.get_size()
 width = int(size[0])
@@ -38,7 +38,7 @@ height = int(size[1])
 print("image size is: ", width, height)
 
 # Try to grab the first part of it, it has 3 parts.
-sprite_sheet_width = int(width/3)
+sprite_sheet_width = int(width / 3)
 rect = pygame.Rect(0, 0, sprite_sheet_width, height)
 sheet0 = pygame.Surface([sprite_sheet_width, height])
 sheet0.blit(mySprites, (0, 0), rect)
@@ -51,7 +51,9 @@ h = int(size[1])
 print("image size is: ", w, h)
 
 # Try to grab the second part of it, it has 3 parts.
-rect = pygame.Rect(sprite_sheet_width, 0, sprite_sheet_width+sprite_sheet_width, height)
+rect = pygame.Rect(
+    sprite_sheet_width, 0, sprite_sheet_width + sprite_sheet_width, height
+)
 sheet1 = pygame.Surface([sprite_sheet_width, height])
 sheet1.blit(mySprites, (0, 0), rect)
 
@@ -62,7 +64,7 @@ h = int(size[1])
 print("image size is: ", w, h)
 
 # Try to grab the last part of it, it has 3 parts.
-rect = pygame.Rect(2*sprite_sheet_width, 0, 3*sprite_sheet_width, height)
+rect = pygame.Rect(2 * sprite_sheet_width, 0, 3 * sprite_sheet_width, height)
 sheet2 = pygame.Surface([sprite_sheet_width, height])
 sheet2.blit(mySprites, (0, 0), rect)
 
@@ -76,27 +78,27 @@ print("image size is: ", w, h)
 pygame.display.set_caption("Pac Man????")
 
 running = True
-while(running):
+while running:
     # Handle events
     for event in pygame.event.get():
-        if (event.type == pygame.QUIT):
+        if event.type == pygame.QUIT:
             running = False
-            
-        if (event.type == pygame.MOUSEBUTTONDOWN):
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
             pass
-        
-        #if (event.type == pygame.KEYDOWN):
+
+        # if (event.type == pygame.KEYDOWN):
         #    player.animate_me()
-            
+
     key = pygame.key.get_pressed()
-    if (key[pygame.K_ESCAPE]  == True):
+    if key[pygame.K_ESCAPE] == True:
         running = False
-    
-    # Draw 
+
+    # Draw
     screen.blit(sheet0, [0, 0])
     screen.blit(sheet1, [0, height])
-    screen.blit(sheet2, [0, 2*height])
-    
+    screen.blit(sheet2, [0, 2 * height])
+
     # Put surface to video memory
     pygame.display.flip()
     # Make sure we get 60 or frames per second
